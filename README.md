@@ -9,7 +9,7 @@ A Python CLI tool for controlling RGB lighting on the AUKEY KM-G15 mechanical ke
 ## Features / 功能
 
 - Switch between 3 profile slots / 切换 3 个配置文件槽位
-- Set lighting modes (8 effects) / 设置灯效模式（8 种效果）
+- Set lighting modes (19 effects) / 设置灯效模式（19 种效果）
 - Adjust speed/brightness / 调整速度/亮度
 - Configure USB polling rate (125-1000 Hz) / 配置 USB 回报率
 - Read current device status / 读取当前设备状态
@@ -94,6 +94,17 @@ km-g15-rgb status
 | 6 | 常亮 | Normally on |
 | 7 | 踏雪无痕 | Pass without trace |
 | 8 | 泛起涟漪 | Ripple graff |
+| 9 | 奔逸绝尘 | Fast run without trace |
+| 10 | 繁星点点 | Snow winter jasmine |
+| 11 | 百花争艳 | Flowers blooming |
+| 12 | 流星赶月 | Swift action |
+| 13 | 大鹏展翅 | Hurricane |
+| 14 | 厚积薄发 | Accumulate |
+| 15 | 落雨纷纷 | Digital Times |
+| 16 | 左右逢缘 | Both ways |
+| 17 | 众志成城 | Surmount |
+| 18 | 速度激情 | Fast and the Furious |
+| 20 | 指点江山 | Coastal |
 
 ## USB Polling Rate / USB 回报率
 

@@ -100,6 +100,8 @@ Each profile has an offset of `0x0200` from the base address:
 
 ## 7. Light Mode Values / 灯效模式值
 
+19 lighting modes available (note: mode 19 does not exist):
+
 | Value | Name (CN) | Name (EN) |
 |-------|-----------|-----------|
 | 1 | 随波逐流 | Go with the stream |
@@ -110,6 +112,17 @@ Each profile has an offset of `0x0200` from the base address:
 | 6 | 常亮 | Normally on |
 | 7 | 踏雪无痕 | Pass without trace |
 | 8 | 泛起涟漪 | Ripple graff |
+| 9 | 奔逸绝尘 | Fast run without trace |
+| 10 | 繁星点点 | Snow winter jasmine |
+| 11 | 百花争艳 | Flowers blooming |
+| 12 | 流星赶月 | Swift action |
+| 13 | 大鹏展翅 | Hurricane |
+| 14 | 厚积薄发 | Accumulate |
+| 15 | 落雨纷纷 | Digital Times |
+| 16 | 左右逢缘 | Both ways |
+| 17 | 众志成城 | Surmount |
+| 18 | 速度激情 | Fast and the Furious |
+| 20 | 指点江山 | Coastal |
 
 ## 8. USB Polling Rate Values / USB 回报率值
 

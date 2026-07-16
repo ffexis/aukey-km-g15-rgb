@@ -3,7 +3,7 @@ import click
 import sys
 from .device import KM_G15_Device
 from .protocol import KM_G15_Protocol, RGBColor, Zone, LightingMode
-from .effects import list_modes, get_mode, LIGHTING_MODES
+from .effects import list_modes, get_mode_name, MODE_NAMES
 
 
 @click.group()
@@ -39,12 +39,12 @@ def info():
 def list_modes_cmd():
     """List available lighting modes."""
     click.echo("Available lighting modes:\n")
-    click.echo("ID | 中文名     | 英文名")
-    click.echo("-" * 50)
-    
+    click.echo("ID | 中文名         | 英文名")
+    click.echo("-" * 55)
+
     for mode_id in list_modes():
-        mode = LIGHTING_MODES[mode_id]
-        click.echo(f"{mode_id:2d} | {mode.name_cn:<10} | {mode.name_en}")
+        cn, en = get_mode_name(mode_id)
+        click.echo(f"{mode_id:2d} | {cn:<12} | {en}")
 
 
 @cli.command()
@@ -53,21 +53,22 @@ def list_modes_cmd():
 def mode(mode_id, profile):
     """Set lighting mode by ID.
 
-    Available modes: 1-8 (use 'list-modes' to see all)
+    Available modes: 1-18, 20 (use 'list-modes' to see all)
     """
-    try:
-        mode_info = get_mode(mode_id)
-    except KeyError as e:
-        click.echo(str(e), err=True)
+    if mode_id not in MODE_NAMES:
+        valid = ', '.join(str(m) for m in sorted(MODE_NAMES.keys()))
+        click.echo(f"Invalid mode {mode_id}. Valid modes: {valid}", err=True)
         sys.exit(1)
 
     if profile not in (0, 1, 2):
         click.echo("Profile must be 0, 1, or 2", err=True)
         sys.exit(1)
 
+    cn, en = get_mode_name(mode_id)
+
     try:
         with KM_G15_Device() as device:
-            click.echo(f"Setting mode to {mode_id}: {mode_info.name_cn} ({mode_info.name_en}) on profile {profile}")
+            click.echo(f"Setting mode to {mode_id}: {cn} ({en}) on profile {profile}")
 
             # Three-step command sequence
             start = KM_G15_Protocol.build_start_flag()

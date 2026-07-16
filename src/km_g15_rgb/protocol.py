@@ -17,7 +17,7 @@ class Zone(IntEnum):
 
 
 class LightingMode(IntEnum):
-    """Lighting Effect Modes (from Main.ini [Mode] section)."""
+    """Lighting Effect Modes (from Main.ini [Mode] section, 19 modes)."""
     STREAM = 1           # 随波逐流 / Go with the stream
     CLOUDS = 2           # 彩云纷飞 / Clouds fly
     WINDING = 3          # 峰回路转 / Winding paths
@@ -26,6 +26,17 @@ class LightingMode(IntEnum):
     STATIC = 6           # 常亮 / Normally on
     SNOW = 7             # 踏雪无痕 / Pass without trace
     RIPPLE = 8           # 泛起涟漪 / Ripple graff
+    FAST = 9             # 奔逸绝尘 / Fast run without trace
+    STARS = 10           # 繁星点点 / Snow winter jasmine
+    FLOWERS = 11         # 百花争艳 / Flowers blooming
+    METEOR = 12          # 流星赶月 / Swift action
+    HURRICANE = 13       # 大鹏展翅 / Hurricane
+    ACCUMULATE = 14      # 厚积薄发 / Accumulate
+    DIGITAL = 15         # 落雨纷纷 / Digital Times
+    BOTHWAYS = 16        # 左右逢缘 / Both ways
+    SURMOUNT = 17        # 众志成城 / Surmount
+    FASTFURIOUS = 18     # 速度激情 / Fast and the Furious
+    COASTAL = 20         # 指点江山 / Coastal
 
 
 @dataclass
