@@ -1,13 +1,34 @@
 """Command-Line Interface for AUKEY KM-G15 RGB Control"""
 import click
 import sys
+import time
 from .device import KM_G15_Device
 from .protocol import KM_G15_Protocol, RGBColor, Zone, LightingMode
 from .effects import list_modes, get_mode_name, MODE_NAMES
 
 
+def read_current_profile(device) -> int:
+    """Read the current active profile from device.
+
+    Args:
+        device: Open KM_G15_Device instance
+
+    Returns:
+        int: Current profile index (0, 1, or 2)
+    """
+    cmd = KM_G15_Protocol.build_read_packet()
+    device.send_report(cmd)
+
+    time.sleep(0.1)
+    response = device.read(timeout_ms=500)
+
+    if response and len(response) >= 19:
+        return response[18]
+    return 0
+
+
 @click.group()
-@click.version_option(version="0.2.0", prog_name="km-g15-rgb")
+@click.version_option(version="0.3.0", prog_name="km-g15-rgb")
 def cli():
     """AUKEY KM-G15 RGB Keyboard Control CLI"""
     pass
@@ -17,13 +38,13 @@ def cli():
 def info():
     """Show device information."""
     devices = KM_G15_Device.enumerate_devices()
-    
+
     if not devices:
         click.echo("No AUKEY KM-G15 device found.", err=True)
         sys.exit(1)
-    
+
     click.echo(f"Found {len(devices)} interface(s):\n")
-    
+
     for i, d in enumerate(devices):
         click.echo(f"Interface {i}:")
         click.echo(f"  VID: 0x{d['vendor_id']:04x}")
@@ -49,25 +70,32 @@ def list_modes_cmd():
 
 @cli.command()
 @click.argument("mode_id", type=int)
-@click.option("--profile", "-p", type=int, default=0, help="Profile slot (0, 1, or 2)")
+@click.option("--profile", "-p", type=int, default=None, help="Profile slot (0, 1, or 2). If not specified, uses current active profile.")
 def mode(mode_id, profile):
     """Set lighting mode by ID.
 
     Available modes: 1-18, 20 (use 'list-modes' to see all)
+
+    If --profile is not specified, the command targets the currently active profile.
     """
     if mode_id not in MODE_NAMES:
         valid = ', '.join(str(m) for m in sorted(MODE_NAMES.keys()))
         click.echo(f"Invalid mode {mode_id}. Valid modes: {valid}", err=True)
         sys.exit(1)
 
-    if profile not in (0, 1, 2):
-        click.echo("Profile must be 0, 1, or 2", err=True)
-        sys.exit(1)
-
     cn, en = get_mode_name(mode_id)
 
     try:
         with KM_G15_Device() as device:
+            # Auto-detect profile if not specified
+            if profile is None:
+                profile = read_current_profile(device)
+                click.echo(f"Auto-detected active profile: {profile}")
+
+            if profile not in (0, 1, 2):
+                click.echo("Profile must be 0, 1, or 2", err=True)
+                sys.exit(1)
+
             click.echo(f"Setting mode to {mode_id}: {cn} ({en}) on profile {profile}")
 
             # Three-step command sequence
@@ -89,15 +117,20 @@ def mode(mode_id, profile):
 
 @cli.command()
 @click.option("--speed", "-s", type=int, default=1, help="Speed/brightness value (1-255)")
-@click.option("--profile", "-p", type=int, default=0, help="Profile slot (0, 1, or 2)")
+@click.option("--profile", "-p", type=int, default=None, help="Profile slot (0, 1, or 2). If not specified, uses current active profile.")
 def speed(speed, profile):
     """Set lighting speed/brightness."""
-    if profile not in (0, 1, 2):
-        click.echo("Profile must be 0, 1, or 2", err=True)
-        sys.exit(1)
-
     try:
         with KM_G15_Device() as device:
+            # Auto-detect profile if not specified
+            if profile is None:
+                profile = read_current_profile(device)
+                click.echo(f"Auto-detected active profile: {profile}")
+
+            if profile not in (0, 1, 2):
+                click.echo("Profile must be 0, 1, or 2", err=True)
+                sys.exit(1)
+
             click.echo(f"Setting speed to {speed} on profile {profile}")
 
             # Three-step command sequence
@@ -119,18 +152,23 @@ def speed(speed, profile):
 
 @cli.command()
 @click.option("--rate", "-r", type=click.Choice(['125', '250', '500', '1000']), default='1000', help="USB polling rate")
-@click.option("--profile", "-p", type=int, default=0, help="Profile slot (0, 1, or 2)")
+@click.option("--profile", "-p", type=int, default=None, help="Profile slot (0, 1, or 2). If not specified, uses current active profile.")
 def rate(rate, profile):
     """Set USB polling rate."""
     rate_map = {'125': 0, '250': 1, '500': 2, '1000': 3}
     rate_code = rate_map[rate]
 
-    if profile not in (0, 1, 2):
-        click.echo("Profile must be 0, 1, or 2", err=True)
-        sys.exit(1)
-
     try:
         with KM_G15_Device() as device:
+            # Auto-detect profile if not specified
+            if profile is None:
+                profile = read_current_profile(device)
+                click.echo(f"Auto-detected active profile: {profile}")
+
+            if profile not in (0, 1, 2):
+                click.echo("Profile must be 0, 1, or 2", err=True)
+                sys.exit(1)
+
             click.echo(f"Setting USB rate to {rate}Hz on profile {profile}")
 
             # Three-step command sequence
@@ -210,31 +248,10 @@ def status():
         with KM_G15_Device() as device:
             click.echo("Reading device status...")
 
-            # Send READ command
-            cmd = KM_G15_Protocol.build_read_packet()
-            device.send_report(cmd)
+            profile_index = read_current_profile(device)
 
-            # Try to read response
-            import time
-            time.sleep(0.1)
-            response = device.read(timeout_ms=500)
-
-            if response and len(response) >= 18:
-                # Parse response
-                # Header: 04 [checksum] 00 03 [datalen] [addr_lsb] [addr_msb] 00
-                # Data starts at Byte 8: 55 aa ff 02 45 0c 66 76 03 01 [profile_index] 18 ...
-                cmd_type = response[3]
-                data_len = response[4]
-                profile_index = response[18] if len(response) > 18 else 0
-
-                click.echo(f"\nDevice Status:")
-                click.echo(f"  Current Profile: {profile_index}")
-                click.echo(f"  CmdType: 0x{cmd_type:02x}")
-                click.echo(f"  DataLen: {data_len}")
-            else:
-                click.echo("No valid response received.")
-                if response:
-                    click.echo(f"Raw: {response.hex()}")
+            click.echo(f"\nDevice Status:")
+            click.echo(f"  Current Profile: {profile_index}")
 
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
