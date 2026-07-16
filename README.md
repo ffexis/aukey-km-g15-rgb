@@ -10,8 +10,9 @@ A Python CLI tool for controlling RGB lighting on the AUKEY KM-G15 mechanical ke
 
 - Switch between 3 profile slots / 切换 3 个配置文件槽位
 - Set lighting modes (19 effects) / 设置灯效模式（19 种效果）
-- Adjust speed/brightness / 调整速度/亮度
+- Adjust speed, brightness, direction / 调整速度、亮度、方向
 - Configure USB polling rate (125-1000 Hz) / 配置 USB 回报率
+- Auto-detect active profile / 自动检测当前激活的配置文件
 - Read current device status / 读取当前设备状态
 
 ## Supported Keyboard / 支持的键盘
@@ -22,7 +23,7 @@ A Python CLI tool for controlling RGB lighting on the AUKEY KM-G15 mechanical ke
 ## Installation / 安装
 
 ```bash
-git clone https://github.com/your-username/aukey-km-g15-rgb.git
+git clone https://github.com/ffexis/aukey-km-g15-rgb.git
 cd aukey-km-g15-rgb
 pip install -e .
 ```
@@ -33,6 +34,12 @@ pip install -e .
 
 ```bash
 km-g15-rgb info
+```
+
+### Read device status / 读取设备状态
+
+```bash
+km-g15-rgb status
 ```
 
 ### List available modes / 列出可用模式
@@ -52,22 +59,26 @@ km-g15-rgb profile 2    # Profile 2
 ### Set lighting mode / 设置灯效模式
 
 ```bash
-km-g15-rgb mode 6 -p 0     # Profile 0, 常亮 (Static)
-km-g15-rgb mode 5 -p 1     # Profile 1, 呼吸 (Breathing)
-km-g15-rgb mode 1 -p 2     # Profile 2, 随波逐流 (Stream)
+# Auto-detect active profile / 自动检测当前配置文件
+km-g15-rgb mode 6       # 常亮 (Static) on current profile
+
+# Specify profile / 指定配置文件
+km-g15-rgb mode 5 -p 0  # Profile 0, 呼吸 (Breathing)
+km-g15-rgb mode 1 -p 2  # Profile 2, 随波逐流 (Stream)
 ```
 
 ### Set speed / 设置速度
 
 ```bash
-km-g15-rgb speed -s 1 -p 0   # Speed 1 on Profile 0
+km-g15-rgb speed -s 1      # Speed 1 on current profile
+km-g15-rgb speed -s 3 -p 0 # Speed 3 on Profile 0
 ```
 
 ### Set USB polling rate / 设置 USB 回报率
 
 ```bash
-km-g15-rgb rate -r 1000 -p 0   # 1000Hz on Profile 0
-km-g15-rgb rate -r 125 -p 1    # 125Hz on Profile 1
+km-g15-rgb rate -r 1000      # 1000Hz on current profile
+km-g15-rgb rate -r 125 -p 1  # 125Hz on Profile 1
 ```
 
 ### Enable RGB lighting / 启用 RGB 灯效
@@ -76,10 +87,18 @@ km-g15-rgb rate -r 125 -p 1    # 125Hz on Profile 1
 km-g15-rgb light-on
 ```
 
-### Read device status / 读取设备状态
+## Auto-detect Profile / 自动检测配置文件
+
+When `--profile` (`-p`) is not specified, the command automatically reads the current active profile from the device and applies the setting to it.
+
+当未指定 `--profile` (`-p`) 参数时，命令会自动从设备读取当前激活的配置文件，并将设置应用到该配置文件。
 
 ```bash
-km-g15-rgb status
+# This will detect current profile and apply mode 6 to it
+km-g15-rgb mode 6
+
+# This explicitly sets mode 5 on profile 0
+km-g15-rgb mode 5 -p 0
 ```
 
 ## Lighting Modes / 灯效模式
