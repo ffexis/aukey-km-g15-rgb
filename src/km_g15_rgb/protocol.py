@@ -112,8 +112,8 @@ class KM_G15_Protocol:
 
     # Runtime parameter addresses (relative to profile base)
     ADDR_LIGHT_MODE_BASE = 0x0000   # Light mode (relative)
-    ADDR_LIGHT_SPEED = 0x0001       # Animation speed
-    ADDR_LIGHT_BRIGHTNESS = 0x0002  # Brightness level
+    ADDR_LIGHT_BRIGHTNESS = 0x0001  # Brightness level (0-4)
+    ADDR_LIGHT_SPEED = 0x0002       # Animation speed
     ADDR_LIGHT_DIRECTION = 0x0003   # Animation direction (0x00=right, 0xFF=left)
     ADDR_LIGHT_COLORFUL = 0x0004    # Colorful mode toggle
     ADDR_USB_RATE_BASE = 0x000F     # USB polling rate (relative)
