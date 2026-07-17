@@ -282,15 +282,40 @@ def light_on():
 
 @cli.command()
 def status():
-    """Read current device status."""
+    """Read current device status and configuration."""
     try:
         with KM_G15_Device() as device:
             click.echo("Reading device status...")
 
+            # Read current profile
             profile_index = read_current_profile(device)
-
             click.echo(f"\nDevice Status:")
             click.echo(f"  Current Profile: {profile_index}")
+
+            # Read full configuration
+            click.echo(f"\nReading configuration for Profile {profile_index}...")
+            cmd = KM_G15_Protocol.build_read_config_packet(profile_index)
+            device.send_report(cmd)
+
+            time.sleep(0.3)
+            response = device.read(timeout_ms=500)
+
+            if response and len(response) >= 16:
+                config = KM_G15_Protocol.parse_config_response(response)
+
+                # Get mode name
+                from .effects import get_mode_name
+                cn, en = get_mode_name(config['mode'])
+
+                click.echo(f"\nProfile {profile_index} Configuration:")
+                click.echo(f"  Mode: {config['mode']} ({cn} / {en})")
+                click.echo(f"  Speed: {config['speed']}")
+                click.echo(f"  Brightness: (not in config)")
+                click.echo(f"  Direction: {config['direction']}")
+                click.echo(f"  Colorful: {'ON' if config['colorful'] else 'OFF'}")
+                click.echo(f"  Color: #{config['color'].to_hex()}")
+            else:
+                click.echo("Failed to read configuration.")
 
     except Exception as e:
         click.echo(f"Error: {e}", err=True)

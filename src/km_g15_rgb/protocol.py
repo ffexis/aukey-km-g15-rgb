@@ -357,3 +357,56 @@ class KM_G15_Protocol:
             data=data,
             data_len=0x2C
         )
+
+    @staticmethod
+    def parse_config_response(response: bytes) -> dict:
+        """Parse configuration response from device.
+
+        Config data format (from byte 8):
+            Byte 0: Mode (1-18, 20)
+            Byte 1: Speed (0-4)
+            Byte 2: Colorful (0=OFF, 1=ON)
+            Byte 3: Direction (0x00=Right, 0xFF=Left)
+            Byte 5-7: RGB Color (R, G, B)
+
+        Args:
+            response: 64-byte response from device
+
+        Returns:
+            dict: Parsed configuration
+        """
+        if len(response) < 16:
+            return {"error": "Response too short"}
+
+        # Config data starts at byte 8
+        config = response[8:]
+
+        return {
+            "mode": config[0] if len(config) > 0 else 0,
+            "speed": config[1] if len(config) > 1 else 0,
+            "colorful": bool(config[2]) if len(config) > 2 else False,
+            "direction": "left" if config[3] == 0xff else "right" if len(config) > 3 else "unknown",
+            "color": RGBColor(
+                r=config[5] if len(config) > 5 else 0,
+                g=config[6] if len(config) > 6 else 0,
+                b=config[7] if len(config) > 7 else 0
+            ),
+        }
+
+    @staticmethod
+    def build_read_config_packet(profile: int = 0) -> bytes:
+        """Build packet to read full configuration for a profile.
+
+        Args:
+            profile: Profile slot (0, 1, or 2)
+
+        Returns:
+            bytes: 64-byte packet
+        """
+        addr = profile * 0x0200  # Each profile has 0x200 offset for config
+        return KM_G15_Protocol.build_packet(
+            cmd_type=0x05,
+            addr=addr,
+            data=bytes(56),
+            data_len=56
+        )
