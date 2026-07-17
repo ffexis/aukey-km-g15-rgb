@@ -123,7 +123,7 @@ class KM_G15_Protocol:
     ADDR_LIGHT_BRIGHTNESS = 0x0001  # Brightness level (0-4, 5 levels)
     ADDR_LIGHT_DIRECTION = 0x0003   # Animation direction (0x00=right, 0xFF=left)
     ADDR_LIGHT_COLORFUL = 0x0004    # Colorful mode toggle (0=off, 1=on)
-    ADDR_USB_RATE_BASE = 0x000F     # USB polling rate (0-3)
+    ADDR_USB_RATE_BASE = 0x000F     # USB polling rate (per profile base)
 
     # Parameter ranges
     BRIGHTNESS_MIN = 0

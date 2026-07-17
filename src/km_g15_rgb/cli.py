@@ -307,13 +307,12 @@ def status():
                 from .effects import get_mode_name
                 cn, en = get_mode_name(config['mode'])
 
-                # Read Speed from runtime register 0x002B
-                speed_cmd = KM_G15_Protocol.build_read_runtime_packet(0x002B)
+                # Read Speed from runtime register 0x0002
+                speed_cmd = KM_G15_Protocol.build_read_runtime_packet(0x0002)
                 device.send_report(speed_cmd)
                 time.sleep(0.2)
                 speed_resp = device.read(timeout_ms=500)
-                speed_raw = speed_resp[8] if speed_resp and len(speed_resp) > 8 else 0
-                speed = speed_raw - 1  # Speed is stored as raw_value - 1
+                speed = speed_resp[8] if speed_resp and len(speed_resp) > 8 else 0
 
                 # USB Rate from config
                 rate_map = {0: 125, 1: 250, 2: 500, 3: 1000}
