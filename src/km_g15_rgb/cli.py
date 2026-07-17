@@ -116,13 +116,21 @@ def mode(mode_id, profile):
 
 
 @cli.command()
-@click.option("--speed", "-s", type=int, default=3, help="Speed value (1-5)")
+@click.option("--speed", "-s", type=int, default=3, help="Speed level (1=slowest, 5=fastest)")
 @click.option("--profile", "-p", type=int, default=None, help="Profile slot (0, 1, or 2). If not specified, uses current active profile.")
 def speed(speed, profile):
-    """Set animation speed (1=slow, 5=fast)."""
+    """Set animation speed (1=slowest, 5=fastest).
+
+    Note: Hardware stores speed inverted (5-value), so CLI handles the conversion.
+    """
+    # Validate input (user-facing: 1-5)
     if speed < 1 or speed > 5:
         click.echo("Speed must be 1-5", err=True)
         sys.exit(1)
+
+    # Convert to hardware value (inverted: 5 - user_value)
+    # Hardware stores 0=fastest, 4=slowest (inverted from UI)
+    hw_value = 5 - speed
 
     try:
         with KM_G15_Device() as device:
@@ -139,7 +147,8 @@ def speed(speed, profile):
             start = KM_G15_Protocol.build_start_flag()
             device.send_report(start)
 
-            cmd = KM_G15_Protocol.build_speed_packet(speed, profile)
+            # Send hw_value to hardware (inverted)
+            cmd = KM_G15_Protocol.build_speed_packet(hw_value, profile)
             device.send_report(cmd)
 
             end = KM_G15_Protocol.build_end_flag()
@@ -307,12 +316,15 @@ def status():
                 from .effects import get_mode_name
                 cn, en = get_mode_name(config['mode'])
 
-                # Read Speed from runtime register 0x0002
+                # Read Speed from runtime register
+                # Hardware stores speed inverted (0=fastest, 4=slowest)
+                # We convert to user-facing value (1=slowest, 5=fastest)
                 speed_cmd = KM_G15_Protocol.build_read_runtime_packet(0x0002)
                 device.send_report(speed_cmd)
                 time.sleep(0.2)
                 speed_resp = device.read(timeout_ms=500)
-                speed = speed_resp[8] if speed_resp and len(speed_resp) > 8 else 0
+                speed_raw = speed_resp[8] if speed_resp and len(speed_resp) > 8 else 0
+                speed = 5 - speed_raw  # Convert: hw_value(0-4) -> user_value(1-5)
 
                 # USB Rate from config
                 rate_map = {0: 125, 1: 250, 2: 500, 3: 1000}

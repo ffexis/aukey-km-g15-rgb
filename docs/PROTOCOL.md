@@ -98,7 +98,23 @@ Each profile has an offset of `0x0200` from the base address:
 | Profile 1 | `0x0400` | `0x05FF` |
 | Profile 2 | `0x0600` | `0x07FF` |
 
-## 7. Light Mode Values / 灯效模式值
+## 7. Speed Value Mapping / 速度值映射
+
+**Important**: Hardware stores speed **inverted** (counter-intuitive).
+
+| User Value (UI) | Hardware Value | Meaning |
+|-----------------|----------------|---------|
+| 1 (Slowest) | 4 | Min speed |
+| 2 | 3 | |
+| 3 | 2 | |
+| 4 | 1 | |
+| 5 (Fastest) | 0 | Max speed |
+
+Formula: `Hardware Value = 5 - User Value`
+
+The CLI automatically handles this conversion. When reading from hardware, the value is inverted back to user-facing value (1-5).
+
+## 8. Light Mode Values / 灯效模式值
 
 19 lighting modes available (note: mode 19 does not exist):
 

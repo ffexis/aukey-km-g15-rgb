@@ -83,8 +83,8 @@ km-g15-rgb brightness -b 5 -p 0  # Brightness 5 on Profile 0
 ### Set speed / 设置速度
 
 ```bash
-km-g15-rgb speed -s 1       # Speed 1 on current profile
-km-g15-rgb speed -s 3 -p 0  # Speed 3 on Profile 0
+km-g15-rgb speed -s 1       # Speed 1 (slowest) on current profile
+km-g15-rgb speed -s 5 -p 0  # Speed 5 (fastest) on Profile 0
 ```
 
 ### Set USB polling rate / 设置 USB 回报率
@@ -143,7 +143,7 @@ km-g15-rgb mode 5 -p 0
 | Parameter | Range | Description |
 |-----------|-------|-------------|
 | Brightness | 0-4 | 0=Min, 4=Max |
-| Speed | 1-5 | 1=Slow, 5=Fast |
+| Speed | 1-5 | 1=Slowest, 5=Fastest (hardware stores inverted: 0=Fastest, 4=Slowest) |
 | USB Rate | 0-3 | 125/250/500/1000 Hz |
 
 ## USB Polling Rate / USB 回报率
