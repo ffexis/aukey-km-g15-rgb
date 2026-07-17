@@ -36,9 +36,12 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Project specific - development artifacts
 captures/
 *.pcap
 *.pcapng
 libusb/
-*.7z
+libusb.7z
+.mimocode/
+.pytest_cache/
+__pycache__/
