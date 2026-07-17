@@ -307,32 +307,26 @@ def status():
                 from .effects import get_mode_name
                 cn, en = get_mode_name(config['mode'])
 
-                click.echo(f"\nProfile {profile_index} Configuration:")
-                click.echo(f"  Mode: {config['mode']} ({cn} / {en})")
-                click.echo(f"  Brightness: {config['brightness']}")
-                click.echo(f"  Direction: {config['direction']}")
-                click.echo(f"  Colorful: {'ON' if config['colorful'] else 'OFF'}")
-                click.echo(f"  Color: #{config['color'].to_hex()}")
-
-                # Read Speed (runtime register)
-                speed_cmd = KM_G15_Protocol.build_read_runtime_packet(profile_index, 0x002B)
+                # Read Speed from runtime register 0x002B
+                speed_cmd = KM_G15_Protocol.build_read_runtime_packet(0x002B)
                 device.send_report(speed_cmd)
                 time.sleep(0.2)
                 speed_resp = device.read(timeout_ms=500)
-                if speed_resp and len(speed_resp) >= 9:
-                    speed = speed_resp[8]
-                    click.echo(f"  Speed: {speed}")
+                speed_raw = speed_resp[8] if speed_resp and len(speed_resp) > 8 else 0
+                speed = speed_raw - 1  # Speed is stored as raw_value - 1
 
-                # Read USB Rate (runtime register)
-                rate_cmd = KM_G15_Protocol.build_read_runtime_packet(profile_index, 0x000F)
-                device.send_report(rate_cmd)
-                time.sleep(0.2)
-                rate_resp = device.read(timeout_ms=500)
-                if rate_resp and len(rate_resp) >= 9:
-                    rate_code = rate_resp[8]
-                    rate_map = {0: 125, 1: 250, 2: 500, 3: 1000}
-                    rate = rate_map.get(rate_code, rate_code)
-                    click.echo(f"  USB Rate: {rate}Hz (code={rate_code})")
+                # USB Rate from config
+                rate_map = {0: 125, 1: 250, 2: 500, 3: 1000}
+                rate = rate_map.get(config['usb_rate'], config['usb_rate'])
+
+                click.echo(f"\nProfile {profile_index} Configuration:")
+                click.echo(f"  Mode: {config['mode']} ({cn} / {en})")
+                click.echo(f"  Brightness: {config['brightness']}")
+                click.echo(f"  Speed: {speed}")
+                click.echo(f"  Direction: {config['direction']}")
+                click.echo(f"  Colorful: {'ON' if config['colorful'] else 'OFF'}")
+                click.echo(f"  Color: #{config['color'].to_hex()}")
+                click.echo(f"  USB Rate: {rate}Hz (code={config['usb_rate']})")
             else:
                 click.echo("Failed to read configuration.")
 

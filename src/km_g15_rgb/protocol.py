@@ -369,12 +369,17 @@ class KM_G15_Protocol:
     def parse_config_response(response: bytes) -> dict:
         """Parse configuration response from device.
 
-        Config data format (from byte 8):
+        Config data format (from byte 8, first 7 bytes only):
             Byte 0: Mode (1-18, 20)
             Byte 1: Brightness (0-4, 5 levels)
             Byte 2: Colorful (0=OFF, 1=ON)
             Byte 3: Direction (0x00=Right, 0xFF=Left)
-            Byte 5-7: RGB Color (R, G, B)
+            Byte 4: Reserved
+            Byte 5: Green component
+            Byte 6: Red component
+            Byte 7: Blue component
+
+        Note: Color order is G-R-B, not R-G-B!
 
         Args:
             response: 64-byte response from device
@@ -386,23 +391,32 @@ class KM_G15_Protocol:
             return {"error": "Response too short"}
 
         # Config data starts at byte 8
-        config = response[8:]
-
+        # 42 bytes per profile, tightly packed
+        payload = response[8:50] if len(response) >= 50 else response[8:]
+        
         return {
-            "mode": config[0] if len(config) > 0 else 0,
-            "brightness": config[1] if len(config) > 1 else 0,
-            "colorful": bool(config[2]) if len(config) > 2 else False,
-            "direction": "left" if config[3] == 0xff else "right" if len(config) > 3 else "unknown",
+            "mode": payload[0] if len(payload) > 0 else 0,
+            "brightness": payload[1] if len(payload) > 1 else 0,
+            "colorful": bool(payload[2]) if len(payload) > 2 else False,
+            "direction": "left" if payload[3] == 0xff else "right" if len(payload) > 3 else "unknown",
             "color": RGBColor(
-                r=config[5] if len(config) > 5 else 0,
-                g=config[6] if len(config) > 6 else 0,
-                b=config[7] if len(config) > 7 else 0
+                r=payload[5] if len(payload) > 5 else 0,
+                g=payload[6] if len(payload) > 6 else 0,
+                b=payload[7] if len(payload) > 7 else 0
             ),
+            "usb_rate": payload[15] if len(payload) > 15 else 0,
         }
 
     @staticmethod
     def build_read_config_packet(profile: int = 0) -> bytes:
         """Build packet to read full configuration for a profile.
+
+        Config memory layout (CmdType=0x05):
+        - Profile 0: addr = 0x0000
+        - Profile 1: addr = 0x002A (42 bytes offset)
+        - Profile 2: addr = 0x0054 (84 bytes offset)
+
+        Each profile config is 42 bytes (0x2A), tightly packed.
 
         Args:
             profile: Profile slot (0, 1, or 2)
@@ -410,7 +424,7 @@ class KM_G15_Protocol:
         Returns:
             bytes: 64-byte packet
         """
-        addr = profile * 0x0200  # Each profile has 0x200 offset for config
+        addr = profile * 0x002A  # 42 bytes per profile, compact layout
         return KM_G15_Protocol.build_packet(
             cmd_type=0x05,
             addr=addr,
@@ -419,20 +433,22 @@ class KM_G15_Protocol:
         )
 
     @staticmethod
-    def build_read_runtime_packet(profile: int, offset: int) -> bytes:
+    def build_read_runtime_packet(offset: int) -> bytes:
         """Build packet to read runtime parameter.
 
+        Runtime registers are absolute addresses:
+        - 0x002B: Speed
+        - 0x0039: USB Rate (per profile, base + 0x002A * profile)
+
         Args:
-            profile: Profile slot (0, 1, or 2)
-            offset: Runtime parameter offset (0x000F for USB Rate, 0x002B for Speed)
+            offset: Absolute register address
 
         Returns:
             bytes: 64-byte packet
         """
-        addr = profile * 0x0200 + offset
         return KM_G15_Protocol.build_packet(
             cmd_type=0x05,
-            addr=addr,
+            addr=offset,
             data=bytes(16),
             data_len=16
         )
