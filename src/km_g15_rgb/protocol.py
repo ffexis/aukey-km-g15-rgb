@@ -111,9 +111,16 @@ class KM_G15_Protocol:
     PROFILE_ADDR_OFFSET = 0x002A  # Offset per profile for runtime params
 
     # Runtime parameter addresses (relative to profile base)
-    ADDR_LIGHT_MODE_BASE = 0x0000   # Light mode (1-18, 20)
+    # These are READ from config (CmdType=0x05) at byte offsets:
+    #   Byte 0: Mode
+    #   Byte 1: Brightness (0-4, 5 levels)
+    #   Byte 2: Colorful (0=off, 1=on)
+    #   Byte 3: Direction (0x00=right, 0xFF=left)
+    #   Byte 5-7: RGB Color
+    
+    # WRITE addresses for runtime params (CmdType=0x06):
+    ADDR_LIGHT_SPEED = 0x0002       # Animation speed (0-4, 5 levels)
     ADDR_LIGHT_BRIGHTNESS = 0x0001  # Brightness level (0-4, 5 levels)
-    ADDR_LIGHT_SPEED = 0x0002       # Animation speed (1-5, 5 levels)
     ADDR_LIGHT_DIRECTION = 0x0003   # Animation direction (0x00=right, 0xFF=left)
     ADDR_LIGHT_COLORFUL = 0x0004    # Colorful mode toggle (0=off, 1=on)
     ADDR_USB_RATE_BASE = 0x000F     # USB polling rate (0-3)
@@ -180,7 +187,7 @@ class KM_G15_Protocol:
         """Build start transaction flag."""
         return KM_G15_Protocol.build_packet(
             cmd_type=0x01,
-            addr=0x0001,
+            addr=0x0000,
             data=bytes([])
         )
     
@@ -364,7 +371,7 @@ class KM_G15_Protocol:
 
         Config data format (from byte 8):
             Byte 0: Mode (1-18, 20)
-            Byte 1: Speed (0-4)
+            Byte 1: Brightness (0-4, 5 levels)
             Byte 2: Colorful (0=OFF, 1=ON)
             Byte 3: Direction (0x00=Right, 0xFF=Left)
             Byte 5-7: RGB Color (R, G, B)
@@ -383,7 +390,7 @@ class KM_G15_Protocol:
 
         return {
             "mode": config[0] if len(config) > 0 else 0,
-            "speed": config[1] if len(config) > 1 else 0,
+            "brightness": config[1] if len(config) > 1 else 0,
             "colorful": bool(config[2]) if len(config) > 2 else False,
             "direction": "left" if config[3] == 0xff else "right" if len(config) > 3 else "unknown",
             "color": RGBColor(

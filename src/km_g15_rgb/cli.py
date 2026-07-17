@@ -309,8 +309,7 @@ def status():
 
                 click.echo(f"\nProfile {profile_index} Configuration:")
                 click.echo(f"  Mode: {config['mode']} ({cn} / {en})")
-                click.echo(f"  Speed: {config['speed']}")
-                click.echo(f"  Brightness: (not in config)")
+                click.echo(f"  Brightness: {config['brightness']}")
                 click.echo(f"  Direction: {config['direction']}")
                 click.echo(f"  Colorful: {'ON' if config['colorful'] else 'OFF'}")
                 click.echo(f"  Color: #{config['color'].to_hex()}")
