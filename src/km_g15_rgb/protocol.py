@@ -111,12 +111,18 @@ class KM_G15_Protocol:
     PROFILE_ADDR_OFFSET = 0x002A  # Offset per profile for runtime params
 
     # Runtime parameter addresses (relative to profile base)
-    ADDR_LIGHT_MODE_BASE = 0x0000   # Light mode (relative)
-    ADDR_LIGHT_BRIGHTNESS = 0x0001  # Brightness level (0-4)
-    ADDR_LIGHT_SPEED = 0x0002       # Animation speed
+    ADDR_LIGHT_MODE_BASE = 0x0000   # Light mode (1-18, 20)
+    ADDR_LIGHT_BRIGHTNESS = 0x0001  # Brightness level (0-4, 5 levels)
+    ADDR_LIGHT_SPEED = 0x0002       # Animation speed (1-5, 5 levels)
     ADDR_LIGHT_DIRECTION = 0x0003   # Animation direction (0x00=right, 0xFF=left)
-    ADDR_LIGHT_COLORFUL = 0x0004    # Colorful mode toggle
-    ADDR_USB_RATE_BASE = 0x000F     # USB polling rate (relative)
+    ADDR_LIGHT_COLORFUL = 0x0004    # Colorful mode toggle (0=off, 1=on)
+    ADDR_USB_RATE_BASE = 0x000F     # USB polling rate (0-3)
+
+    # Parameter ranges
+    BRIGHTNESS_MIN = 0
+    BRIGHTNESS_MAX = 4
+    SPEED_MIN = 1
+    SPEED_MAX = 5
 
     # Static RGB addresses (larger offset per profile)
     RGB_ADDR_OFFSET = 0x0200  # Offset per profile for static RGB
@@ -209,18 +215,39 @@ class KM_G15_Protocol:
         )
     
     @staticmethod
-    def build_brightness_packet(speed: int, profile: int = 0) -> bytes:
-        """Build packet to set speed/brightness.
+    def build_brightness_packet(brightness: int, profile: int = 0) -> bytes:
+        """Build packet to set brightness.
 
         Args:
-            speed: Speed value (default 0x01)
+            brightness: Brightness value (0-4)
             profile: Profile slot (0, 1, or 2)
 
         Returns:
             bytes: 64-byte packet
         """
         addr = KM_G15_Protocol.get_profile_addr(
-            KM_G15_Protocol.ADDR_LIGHT_PARAM_BASE, profile
+            KM_G15_Protocol.ADDR_LIGHT_BRIGHTNESS, profile
+        )
+        return KM_G15_Protocol.build_packet(
+            cmd_type=KM_G15_Protocol.CMD_RUNTIME_PARAM,
+            addr=addr,
+            data=bytes([brightness]),
+            data_len=1
+        )
+
+    @staticmethod
+    def build_speed_packet(speed: int, profile: int = 0) -> bytes:
+        """Build packet to set animation speed.
+
+        Args:
+            speed: Speed value (1-5)
+            profile: Profile slot (0, 1, or 2)
+
+        Returns:
+            bytes: 64-byte packet
+        """
+        addr = KM_G15_Protocol.get_profile_addr(
+            KM_G15_Protocol.ADDR_LIGHT_SPEED, profile
         )
         return KM_G15_Protocol.build_packet(
             cmd_type=KM_G15_Protocol.CMD_RUNTIME_PARAM,

@@ -1,6 +1,11 @@
 # AUKEY KM-G15 RGB Control / AUKEY KM-G15 RGB 控制工具
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-orange)]()
+
+> **Warning**: This project is under active development. The protocol is still being reverse-engineered and may change.
+
+> **注意**：本项目正在积极开发中，协议仍在逆向工程中，可能会发生变化。
 
 A Python CLI tool for controlling RGB lighting on the AUKEY KM-G15 mechanical keyboard via USB HID.
 
@@ -10,8 +15,9 @@ A Python CLI tool for controlling RGB lighting on the AUKEY KM-G15 mechanical ke
 
 - Switch between 3 profile slots / 切换 3 个配置文件槽位
 - Set lighting modes (19 effects) / 设置灯效模式（19 种效果）
-- Adjust speed, brightness, direction / 调整速度、亮度、方向
+- Adjust brightness (0-4), speed (1-5), direction / 调整亮度、速度、方向
 - Configure USB polling rate (125-1000 Hz) / 配置 USB 回报率
+- Colorful mode toggle / 多彩模式开关
 - Auto-detect active profile / 自动检测当前激活的配置文件
 - Read current device status / 读取当前设备状态
 
@@ -67,11 +73,18 @@ km-g15-rgb mode 5 -p 0  # Profile 0, 呼吸 (Breathing)
 km-g15-rgb mode 1 -p 2  # Profile 2, 随波逐流 (Stream)
 ```
 
+### Set brightness / 设置亮度
+
+```bash
+km-g15-rgb brightness -b 3       # Brightness 3 on current profile
+km-g15-rgb brightness -b 5 -p 0  # Brightness 5 on Profile 0
+```
+
 ### Set speed / 设置速度
 
 ```bash
-km-g15-rgb speed -s 1      # Speed 1 on current profile
-km-g15-rgb speed -s 3 -p 0 # Speed 3 on Profile 0
+km-g15-rgb speed -s 1       # Speed 1 on current profile
+km-g15-rgb speed -s 3 -p 0  # Speed 3 on Profile 0
 ```
 
 ### Set USB polling rate / 设置 USB 回报率
@@ -124,6 +137,14 @@ km-g15-rgb mode 5 -p 0
 | 17 | 众志成城 | Surmount |
 | 18 | 速度激情 | Fast and the Furious |
 | 20 | 指点江山 | Coastal |
+
+## Parameter Ranges / 参数范围
+
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| Brightness | 0-4 | 0=Min, 4=Max |
+| Speed | 1-5 | 1=Slow, 5=Fast |
+| USB Rate | 0-3 | 125/250/500/1000 Hz |
 
 ## USB Polling Rate / USB 回报率
 

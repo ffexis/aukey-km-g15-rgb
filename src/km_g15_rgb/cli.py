@@ -116,13 +116,16 @@ def mode(mode_id, profile):
 
 
 @cli.command()
-@click.option("--speed", "-s", type=int, default=1, help="Speed/brightness value (1-255)")
+@click.option("--speed", "-s", type=int, default=3, help="Speed value (1-5)")
 @click.option("--profile", "-p", type=int, default=None, help="Profile slot (0, 1, or 2). If not specified, uses current active profile.")
 def speed(speed, profile):
-    """Set lighting speed/brightness."""
+    """Set animation speed (1=slow, 5=fast)."""
+    if speed < 1 or speed > 5:
+        click.echo("Speed must be 1-5", err=True)
+        sys.exit(1)
+
     try:
         with KM_G15_Device() as device:
-            # Auto-detect profile if not specified
             if profile is None:
                 profile = read_current_profile(device)
                 click.echo(f"Auto-detected active profile: {profile}")
@@ -133,11 +136,47 @@ def speed(speed, profile):
 
             click.echo(f"Setting speed to {speed} on profile {profile}")
 
-            # Three-step command sequence
             start = KM_G15_Protocol.build_start_flag()
             device.send_report(start)
 
-            cmd = KM_G15_Protocol.build_brightness_packet(speed, profile)
+            cmd = KM_G15_Protocol.build_speed_packet(speed, profile)
+            device.send_report(cmd)
+
+            end = KM_G15_Protocol.build_end_flag()
+            device.send_report(end)
+
+            click.echo("Done!")
+
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command()
+@click.option("--brightness", "-b", type=int, default=4, help="Brightness value (0-4)")
+@click.option("--profile", "-p", type=int, default=None, help="Profile slot (0, 1, or 2). If not specified, uses current active profile.")
+def brightness(brightness, profile):
+    """Set brightness level (0=min, 4=max)."""
+    if brightness < 0 or brightness > 4:
+        click.echo("Brightness must be 0-4", err=True)
+        sys.exit(1)
+
+    try:
+        with KM_G15_Device() as device:
+            if profile is None:
+                profile = read_current_profile(device)
+                click.echo(f"Auto-detected active profile: {profile}")
+
+            if profile not in (0, 1, 2):
+                click.echo("Profile must be 0, 1, or 2", err=True)
+                sys.exit(1)
+
+            click.echo(f"Setting brightness to {brightness} on profile {profile}")
+
+            start = KM_G15_Protocol.build_start_flag()
+            device.send_report(start)
+
+            cmd = KM_G15_Protocol.build_brightness_packet(brightness, profile)
             device.send_report(cmd)
 
             end = KM_G15_Protocol.build_end_flag()
