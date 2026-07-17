@@ -313,6 +313,26 @@ def status():
                 click.echo(f"  Direction: {config['direction']}")
                 click.echo(f"  Colorful: {'ON' if config['colorful'] else 'OFF'}")
                 click.echo(f"  Color: #{config['color'].to_hex()}")
+
+                # Read Speed (runtime register)
+                speed_cmd = KM_G15_Protocol.build_read_runtime_packet(profile_index, 0x002B)
+                device.send_report(speed_cmd)
+                time.sleep(0.2)
+                speed_resp = device.read(timeout_ms=500)
+                if speed_resp and len(speed_resp) >= 9:
+                    speed = speed_resp[8]
+                    click.echo(f"  Speed: {speed}")
+
+                # Read USB Rate (runtime register)
+                rate_cmd = KM_G15_Protocol.build_read_runtime_packet(profile_index, 0x000F)
+                device.send_report(rate_cmd)
+                time.sleep(0.2)
+                rate_resp = device.read(timeout_ms=500)
+                if rate_resp and len(rate_resp) >= 9:
+                    rate_code = rate_resp[8]
+                    rate_map = {0: 125, 1: 250, 2: 500, 3: 1000}
+                    rate = rate_map.get(rate_code, rate_code)
+                    click.echo(f"  USB Rate: {rate}Hz (code={rate_code})")
             else:
                 click.echo("Failed to read configuration.")
 

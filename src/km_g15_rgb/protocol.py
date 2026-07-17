@@ -417,3 +417,22 @@ class KM_G15_Protocol:
             data=bytes(56),
             data_len=56
         )
+
+    @staticmethod
+    def build_read_runtime_packet(profile: int, offset: int) -> bytes:
+        """Build packet to read runtime parameter.
+
+        Args:
+            profile: Profile slot (0, 1, or 2)
+            offset: Runtime parameter offset (0x000F for USB Rate, 0x002B for Speed)
+
+        Returns:
+            bytes: 64-byte packet
+        """
+        addr = profile * 0x0200 + offset
+        return KM_G15_Protocol.build_packet(
+            cmd_type=0x05,
+            addr=addr,
+            data=bytes(16),
+            data_len=16
+        )
