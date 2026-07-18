@@ -130,3 +130,18 @@ See [docs/PROTOCOL.md](docs/PROTOCOL.md) for detailed protocol documentation.
 ## License
 
 MIT License
+
+## Contributors
+
+- **MiMo-V2.5** — Analysis, code, and testing
+- **Google Gemini 3.5 Flash** — Analysis
+
+## Acknowledgments
+
+This project uses the following open source projects:
+
+- [go-hid](https://github.com/sstallion/go-hid) — Go bindings for libhidapi (USB HID communication)
+- [cobra](https://github.com/spf13/cobra) — CLI framework for Go
+- [libhidapi](https://github.com/libusb/hidapi) — Cross-platform HID API library
+
+Protocol reverse-engineered via USB packet capture analysis using [Wireshark](https://www.wireshark.org/) and [USBPcap](https://usbpcap.org/).

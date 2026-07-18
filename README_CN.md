@@ -130,3 +130,18 @@ km-g15-rgb profile 2
 ## 许可证
 
 MIT License
+
+## 贡献者
+
+- **MiMo-V2.5** — 分析、代码、测试
+- **Google Gemini 3.5 Flash** — 分析
+
+## 致谢
+
+本项目使用了以下开源项目：
+
+- [go-hid](https://github.com/sstallion/go-hid) — libhidapi 的 Go 语言绑定（USB HID 通信）
+- [cobra](https://github.com/spf13/cobra) — Go 语言 CLI 框架
+- [libhidapi](https://github.com/libusb/hidapi) — 跨平台 HID API 库
+
+协议通过 [Wireshark](https://www.wireshark.org/) 和 [USBPcap](https://usbpcap.org/) 进行 USB 抓包分析逆向工程得到。
