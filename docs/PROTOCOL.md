@@ -85,8 +85,26 @@ Each profile has an offset of `0x002A` from the base address:
 | Parameter | Profile 0 | Profile 1 | Profile 2 | DataLen |
 |-----------|-----------|-----------|-----------|---------|
 | Light Mode | `0x0000` | `0x002A` | `0x0054` | 1 |
-| Speed/Brightness | `0x0004` | `0x002E` | `0x0058` | 1 |
+| Speed | `0x0002` | `0x002C` | `0x0056` | 1 |
+| Brightness | `0x0001` | `0x002B` | `0x0055` | 1 |
+| Direction | `0x0003` | `0x002D` | `0x0057` | 1 |
+| Colorful | `0x0004` | `0x002E` | `0x0058` | 1 |
 | USB Polling Rate | `0x000F` | `0x0039` | `0x0063` | 1 |
+
+### Reading Configuration (CmdType=0x05)
+
+Configuration data (including speed) is read using **CmdType=0x05** at the profile base address. The response contains 42 bytes of config data starting at byte 8:
+
+| Byte Offset | Field | Description |
+|-------------|-------|-------------|
+| 0 | Mode | Lighting mode (1-18, 20) |
+| 1 | Brightness | Brightness level (0-4) |
+| 2 | Speed | Hardware speed value (0-4; user value = 5 - hw) |
+| 3 | Direction | 0x00=Right, 0xFF=Left |
+| 4 | Colorful | 0=OFF, 1=ON |
+| 5-7 | Color | RGB color data |
+
+**Note**: Speed is stored in flash config and read directly from the config response. No separate runtime register read is needed.
 
 ### Static RGB Data (CmdType=0x11)
 
@@ -104,13 +122,13 @@ Each profile has an offset of `0x0200` from the base address:
 
 | User Value (UI) | Hardware Value | Meaning |
 |-----------------|----------------|---------|
-| 1 (Slowest) | 4 | Min speed |
-| 2 | 3 | |
-| 3 | 2 | |
-| 4 | 1 | |
-| 5 (Fastest) | 0 | Max speed |
+| 0 (Slowest) | 4 | Min speed |
+| 1 | 3 | |
+| 2 | 2 | |
+| 3 | 1 | |
+| 4 (Fastest) | 0 | Max speed |
 
-Formula: `Hardware Value = 5 - User Value`
+Formula: `Hardware Value = 4 - User Value`
 
 The CLI automatically handles this conversion. When reading from hardware, the value is inverted back to user-facing value (1-5).
 

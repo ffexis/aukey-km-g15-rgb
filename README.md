@@ -1,120 +1,97 @@
-# AUKEY KM-G15 RGB Control / AUKEY KM-G15 RGB 控制工具
+# AUKEY KM-G15 RGB Control
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-orange)]()
+[中文版](README_CN.md)
 
-> **Warning**: This project is under active development. The protocol is still being reverse-engineered and may change.
+A CLI tool for controlling RGB lighting on the AUKEY KM-G15 mechanical keyboard via USB HID.
 
-> **注意**：本项目正在积极开发中，协议仍在逆向工程中，可能会发生变化。
+## Features
 
-A Python CLI tool for controlling RGB lighting on the AUKEY KM-G15 mechanical keyboard via USB HID.
+- Switch between 3 profile slots
+- Set lighting modes (19 effects)
+- Adjust brightness, speed, direction
+- Toggle Colorful mode (multi-color cycling)
+- Configure USB polling rate (125-1000 Hz)
+- Auto-detect active profile
+- Read current device status
 
-用于通过 USB HID 控制 AUKEY KM-G15 机械键盘 RGB 灯效的 Python CLI 工具。
-
-## Features / 功能
-
-- Switch between 3 profile slots / 切换 3 个配置文件槽位
-- Set lighting modes (19 effects) / 设置灯效模式（19 种效果）
-- Adjust brightness (0-4), speed (1-5), direction / 调整亮度、速度、方向
-- Configure USB polling rate (125-1000 Hz) / 配置 USB 回报率
-- Colorful mode toggle / 多彩模式开关
-- Auto-detect active profile / 自动检测当前激活的配置文件
-- Read current device status / 读取当前设备状态
-
-## Supported Keyboard / 支持的键盘
+## Supported Keyboard
 
 - **AUKEY KM-G15** (Sonix MCU)
 - VID: `0x0C45`, PID: `0x7666`
 
-## Installation / 安装
+## Installation
+
+### Download Release
+
+Download the latest binary for your platform from [Releases](https://github.com/ffexis/aukey-km-g15-rgb/releases).
+
+### Build from Source
+
+Requires Go 1.21+ and a C compiler (for CGO/hidapi).
 
 ```bash
-git clone https://github.com/ffexis/aukey-km-g15-rgb.git
-cd aukey-km-g15-rgb
-pip install -e .
+cd go
+make build
 ```
 
-## Usage / 使用
+The binary will be output as `km-g15-rgb.exe` (Windows) or `km-g15-rgb` (Linux/macOS).
 
-### Show device info / 显示设备信息
+## Usage
 
 ```bash
+km-g15-rgb <command> [flags]
+
+Global Flags:
+  --device <path>    Specific device path (if multiple keyboards)
+  -p, --profile <n>  Target profile slot (0-2, default: auto-detect)
+```
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `info` | Show connected device information |
+| `status` | Read current device configuration |
+| `mode <id>` | Set lighting effect mode (0-18, 20) |
+| `brightness <0-4>` | Set brightness level |
+| `speed <0-4>` | Set animation speed (0=slowest, 4=fastest) |
+| `rate <hz>` | Set USB polling rate (125, 250, 500, 1000) |
+| `profile <0-2>` | Switch active profile slot |
+| `colorful <on\|off>` | Enable/disable Colorful mode |
+| `list-modes` | List available lighting modes |
+
+### Examples
+
+```bash
+# Show device info
 km-g15-rgb info
-```
 
-### Read device status / 读取设备状态
-
-```bash
+# Read current status
 km-g15-rgb status
-```
 
-### List available modes / 列出可用模式
-
-```bash
-km-g15-rgb list-modes
-```
-
-### Switch profile / 切换配置文件
-
-```bash
-km-g15-rgb profile 0    # Profile 0
-km-g15-rgb profile 1    # Profile 1
-km-g15-rgb profile 2    # Profile 2
-```
-
-### Set lighting mode / 设置灯效模式
-
-```bash
-# Auto-detect active profile / 自动检测当前配置文件
-km-g15-rgb mode 6       # 常亮 (Static) on current profile
-
-# Specify profile / 指定配置文件
-km-g15-rgb mode 5 -p 0  # Profile 0, 呼吸 (Breathing)
-km-g15-rgb mode 1 -p 2  # Profile 2, 随波逐流 (Stream)
-```
-
-### Set brightness / 设置亮度
-
-```bash
-km-g15-rgb brightness -b 3       # Brightness 3 on current profile
-km-g15-rgb brightness -b 5 -p 0  # Brightness 5 on Profile 0
-```
-
-### Set speed / 设置速度
-
-```bash
-km-g15-rgb speed -s 1       # Speed 1 (slowest) on current profile
-km-g15-rgb speed -s 5 -p 0  # Speed 5 (fastest) on Profile 0
-```
-
-### Set USB polling rate / 设置 USB 回报率
-
-```bash
-km-g15-rgb rate -r 1000      # 1000Hz on current profile
-km-g15-rgb rate -r 125 -p 1  # 125Hz on Profile 1
-```
-
-### Enable RGB lighting / 启用 RGB 灯效
-
-```bash
-km-g15-rgb light-on
-```
-
-## Auto-detect Profile / 自动检测配置文件
-
-When `--profile` (`-p`) is not specified, the command automatically reads the current active profile from the device and applies the setting to it.
-
-当未指定 `--profile` (`-p`) 参数时，命令会自动从设备读取当前激活的配置文件，并将设置应用到该配置文件。
-
-```bash
-# This will detect current profile and apply mode 6 to it
+# Set static mode on current profile
 km-g15-rgb mode 6
 
-# This explicitly sets mode 5 on profile 0
-km-g15-rgb mode 5 -p 0
+# Set breathing mode on profile 1
+km-g15-rgb mode 5 -p 1
+
+# Set max brightness
+km-g15-rgb brightness 4
+
+# Set fastest speed
+km-g15-rgb speed 4
+
+# Set 1000Hz polling rate
+km-g15-rgb rate 1000
+
+# Enable Colorful mode
+km-g15-rgb colorful on
+
+# Switch to profile 2
+km-g15-rgb profile 2
 ```
 
-## Lighting Modes / 灯效模式
+## Lighting Modes
 
 | ID | Name (CN) | Name (EN) |
 |----|-----------|-----------|
@@ -138,58 +115,18 @@ km-g15-rgb mode 5 -p 0
 | 18 | 速度激情 | Fast and the Furious |
 | 20 | 指点江山 | Coastal |
 
-## Parameter Ranges / 参数范围
+## Parameter Ranges
 
 | Parameter | Range | Description |
 |-----------|-------|-------------|
 | Brightness | 0-4 | 0=Min, 4=Max |
-| Speed | 1-5 | 1=Slowest, 5=Fastest (hardware stores inverted: 0=Fastest, 4=Slowest) |
-| USB Rate | 0-3 | 125/250/500/1000 Hz |
+| Speed | 0-4 | 0=Slowest, 4=Fastest |
+| USB Rate | 125/250/500/1000 | Hz |
 
-## USB Polling Rate / USB 回报率
+## Protocol Documentation
 
-| Rate | Code |
-|------|------|
-| 125 Hz | 0 |
-| 250 Hz | 1 |
-| 500 Hz | 2 |
-| 1000 Hz | 3 |
+See [docs/PROTOCOL.md](docs/PROTOCOL.md) for detailed protocol documentation.
 
-## Protocol Documentation / 协议文档
-
-See [PROTOCOL.md](docs/PROTOCOL.md) for detailed protocol documentation.
-
-详见 [PROTOCOL.md](docs/PROTOCOL.md) 了解详细协议文档。
-
-## Project Structure / 项目结构
-
-```
-aukey-km-g15-rgb/
-├── src/km_g15_rgb/
-│   ├── __init__.py
-│   ├── device.py          # USB HID device communication
-│   ├── protocol.py        # Protocol definitions
-│   ├── effects.py         # Lighting mode definitions
-│   └── cli.py             # Command-line interface
-├── docs/
-│   └── PROTOCOL.md        # Protocol documentation
-├── tests/
-│   └── test_protocol.py
-├── setup.py
-├── requirements.txt
-└── README.md
-```
-
-## Requirements / 依赖
-
-- Python 3.8+
-- hidapi
-
-## License / 许可
+## License
 
 MIT License
-
-## Acknowledgments / 致谢
-
-- Protocol reverse-engineered via USB packet capture analysis
-- Original software by AUKEY

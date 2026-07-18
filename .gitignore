@@ -1,4 +1,11 @@
-# Python
+# Python (local only, not tracked)
+src/
+tests/
+scripts/
+setup.py
+setup.cfg
+requirements.txt
+*.py
 __pycache__/
 *.py[cod]
 *$py.class
@@ -19,11 +26,10 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Virtual environments
 venv/
 env/
 ENV/
+.pytest_cache/
 
 # IDE
 .vscode/
@@ -43,5 +49,7 @@ captures/
 libusb/
 libusb.7z
 .mimocode/
-.pytest_cache/
-__pycache__/
+
+# Go build artifacts
+go/km-g15-rgb
+go/km-g15-rgb.exe
