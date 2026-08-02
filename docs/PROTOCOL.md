@@ -89,7 +89,16 @@ Each profile has an offset of `0x002A` from the base address:
 | Brightness | `0x0001` | `0x002B` | `0x0055` | 1 |
 | Direction | `0x0003` | `0x002D` | `0x0057` | 1 |
 | Colorful | `0x0004` | `0x002E` | `0x0058` | 1 |
+| Static Color R | `0x0005` | `0x002F` | `0x0059` | 1 |
+| Static Color G | `0x0006` | `0x0030` | `0x005A` | 1 |
+| Static Color B | `0x0007` | `0x0031` | `0x005B` | 1 |
 | USB Polling Rate | `0x000F` | `0x0039` | `0x0063` | 1 |
+
+**Static color write**: R/G/B are written as three separate single-byte RUNTIME
+commands, each wrapped in its own `START → CMD → END` transaction. The registers
+mirror the config-response layout (Color at response bytes 5-7).
+**Verified on real hardware (2026-08-02)** via the WebHID web UI; the write
+mechanism was not previously implemented in the CLI.
 
 ### Reading Configuration (CmdType=0x05)
 
