@@ -70,8 +70,8 @@ Example (set light mode to Breathing on Profile 0):
 
 ```
 → START:   04 01 00 01 00 00 00 00 ... (64 bytes)
-→ CMD:     04 36 00 06 01 00 00 00 05 00 ... (mode=5)
-→ END:     04 02 00 02 00 00 00 00 ... (64 bytes)
+→ CMD:     04 0C 00 06 01 00 00 00 05 00 ... (mode=5)
+→ END:     04 04 00 02 00 02 00 00 ... (64 bytes)
 ```
 
 ## 6. Profile Memory Map / 配置文件内存映射
@@ -99,7 +99,7 @@ Configuration data (including speed) is read using **CmdType=0x05** at the profi
 |-------------|-------|-------------|
 | 0 | Mode | Lighting mode (1-18, 20) |
 | 1 | Brightness | Brightness level (0-4) |
-| 2 | Speed | Hardware speed value (0-4; user value = 5 - hw) |
+| 2 | Speed | Hardware speed value (0-4; user value = 4 - hw) |
 | 3 | Direction | 0x00=Right, 0xFF=Left |
 | 4 | Colorful | 0=OFF, 1=ON |
 | 5-7 | Color | RGB color data |
@@ -130,7 +130,7 @@ Each profile has an offset of `0x0200` from the base address:
 
 Formula: `Hardware Value = 4 - User Value`
 
-The CLI automatically handles this conversion. When reading from hardware, the value is inverted back to user-facing value (1-5).
+The CLI automatically handles this conversion. When reading from hardware, the value is inverted back to user-facing value (0-4).
 
 ## 8. Light Mode Values / 灯效模式值
 
@@ -182,20 +182,20 @@ Fill (28 bytes):  01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 11 10 12 14 + 9 z
 
 ## 10. Read Command / 读取命令
 
-Send CmdType `0x03` with empty payload. Device responds with:
+Send CmdType `0x03` with a 44-byte zero payload (`DataLen=0x2C`). Device responds with:
 
 ```
 [Header] [44 bytes of configuration data including magic signature]
 ```
 
-The current profile index is at offset 18 in the data payload.
+The current profile index is at **byte 18 of the response** (payload offset 10, inside the echoed magic signature).
 
 ## 11. Implementation Notes / 实现注意事项
 
 1. **Open device with `open_path()`**, not `open(VID, PID)` - must select the correct RGB interface
 2. **Data starts at Byte 8** (8-byte header, not 7)
 3. **LED Buffer Reset** requires sending 3 packets to addresses `0x0000`, `0x002A`, `0x0054`
-4. **Profile switch may need to be sent twice** for reliable operation
+4. **Profile switch is sent once** (verified working in the Go implementation; a single packet suffices)
 
 ## References / 参考
 

@@ -64,7 +64,7 @@ type RGBColor struct {
 type DeviceConfig struct {
 	Mode       int
 	Brightness int
-	Speed      int // Hardware value (0-4); user value = 5 - Speed
+	Speed      int // Hardware value (0-4); user value = 4 - Speed
 	Direction  string
 	Colorful   bool
 	Color      RGBColor

@@ -46,7 +46,7 @@ var statusCmd = &cobra.Command{
 		config := protocol.ParseConfigResponse(response)
 
 		// Speed is stored in config flash at byte 2 (hw value 0-4)
-		// Convert to user-facing value (1=slowest, 5=fastest)
+		// Convert to user-facing value (0=slowest, 4=fastest)
 		speed := protocol.HWToUserSpeed(config.Speed)
 
 		rateHz := protocol.RateCodeToHz(config.USBRate)
